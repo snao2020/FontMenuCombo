@@ -1,0 +1,132 @@
+﻿<Window x:Class="FontMenuCombo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:glob="clr-namespace:System.Globalization;assembly=mscorlib"
+        xmlns:gui ="clr-namespace:GuiMisc"
+        mc:Ignorable="d"
+        Closed="Window_Closed"
+        FontFamily="{Binding Source={StaticResource FontFamily},Path=Value}"
+        FontStyle="{Binding Source={StaticResource FontStyle},Path=Value}"
+        FontWeight="{Binding Source={StaticResource FontWeight},Path=Value}"
+        FontSize="{Binding Source={StaticResource FontSize},Path=Value}"
+        Title="MainWindow" Height="350" Width="525">
+
+    <Window.Resources>
+        <gui:FontFamilyNameConverter x:Key="FontFamilyNameConverter"/>
+        <gui:UpdateFontFamiliesConverter x:Key="UpdateFontFamiliesConverter"/>
+        <gui:UpdateCollectionConverter x:Key="UpdateCollectionConverter"/>
+        <gui:UpdateFontSizesConverter x:Key="UpdateFontSizesConverter"/>
+
+        <DataTemplate x:Key="FontFamilyTemplate">
+            <TextBlock Text="{Binding Converter={StaticResource FontFamilyNameConverter},ConverterCulture={x:Static glob:CultureInfo.CurrentCulture}}"/>
+        </DataTemplate>
+
+        <gui:FontFamilyComparer x:Key="FontFamilyComparer"/>
+        <gui:EnumerableCollection x:Key="FontFamilies" Source="{x:Static Fonts.SystemFontFamilies}" 
+                                                       EqualityComparer="{StaticResource FontFamilyComparer}"/>
+
+        <x:Array x:Key="FontStyles" Type="FontStyle">
+            <FontStyle>Normal</FontStyle>
+            <FontStyle>Oblique</FontStyle>
+            <FontStyle>Italic</FontStyle>
+        </x:Array>
+
+        <gui:FontWeightComparer x:Key="FontWeightComparer"/>
+        <gui:ComparerCollection x:Key="FontWeights" Comparer="{StaticResource FontWeightComparer}">
+            <FontWeight>Normal</FontWeight>
+            <FontWeight>Bold</FontWeight>
+        </gui:ComparerCollection>
+
+        <gui:RangeCollection x:Key="FontSizes" Min="6" Max="24"/>
+
+    </Window.Resources>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="F_ont">
+                <MenuItem.Resources>
+                    <RadioButton x:Key="RadioIcon" x:Shared="False" HorizontalAlignment="Center" IsHitTestVisible="False"/>
+                    <Style x:Key="RadioIconStyle" TargetType="MenuItem">
+                        <Setter Property="Icon" Value="{StaticResource RadioIcon}"/>
+                    </Style>
+                </MenuItem.Resources>
+                <MenuItem Header="Font_Family" ItemsSource="{x:Static Fonts.SystemFontFamilies}"
+                          gui:FontMenuBehavior.SelectedItem ="{Binding Source={StaticResource FontFamily},Path=Value,
+                                                                       Converter={StaticResource UpdateFontFamiliesConverter},
+                                                                       ConverterParameter={StaticResource FontFamilies}}"
+                          ItemContainerStyle="{StaticResource RadioIconStyle}"
+                          ItemTemplate="{StaticResource FontFamilyTemplate}"/>
+
+                <MenuItem Header="Font_Style" ItemsSource="{StaticResource FontStyles}" 
+                          gui:FontMenuBehavior.SelectedItem ="{Binding Source={StaticResource FontStyle},Path=Value}"
+                          ItemContainerStyle="{StaticResource RadioIconStyle}"/>
+
+                <MenuItem Header="Font_Weight" ItemsSource="{StaticResource FontWeights}"
+                          gui:FontMenuBehavior.SelectedItem ="{Binding Source={StaticResource FontWeight},Path=Value,
+                                                                       Converter={StaticResource UpdateCollectionConverter},
+                                                                       ConverterParameter={StaticResource FontWeight}}"
+                          ItemContainerStyle="{StaticResource RadioIconStyle}"/>
+
+                <MenuItem Header="FontS_ize" ItemsSource="{StaticResource FontSizes}"
+                          gui:FontMenuBehavior.SelectedItem ="{Binding Source={StaticResource FontSize},Path=Value,
+                                                                       Converter={StaticResource UpdateFontSizesConverter},
+                                                                       ConverterParameter={StaticResource FontSizes}}"
+                          ItemContainerStyle="{StaticResource RadioIconStyle}"/>
+
+                <MenuItem Header="_DefaultFont" IsCheckable="True">
+                    <MenuItem.IsChecked>
+                        <gui:FontResetExtension>
+                            <StaticResource ResourceKey="FontFamily"/>
+                            <StaticResource ResourceKey="FontStyle"/>
+                            <StaticResource ResourceKey="FontWeight"/>
+                            <StaticResource ResourceKey="FontSize"/>
+                        </gui:FontResetExtension>
+                    </MenuItem.IsChecked>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <StackPanel>
+            <ContentControl FontFamily="{DynamicResource {x:Static SystemFonts.MenuFontFamilyKey}}"
+                      FontStyle ="{DynamicResource {x:Static SystemFonts.MenuFontStyleKey}}"
+                      FontWeight="{DynamicResource {x:Static SystemFonts.MenuFontWeightKey}}"
+                      FontSize="{DynamicResource {x:Static SystemFonts.MenuFontSizeKey}}"
+                      >
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox Width="{gui:CalcComboWidth}" ItemsSource="{StaticResource FontFamilies}" 
+                          SelectedItem="{Binding Source={StaticResource FontFamily},Path=Value,
+                                                 Converter={StaticResource UpdateFontFamiliesConverter},
+                                                 ConverterParameter={StaticResource FontFamilies}}"
+                          ItemTemplate="{StaticResource FontFamilyTemplate}"/>
+
+                    <ComboBox Width="{gui:CalcComboWidth}" ItemsSource="{StaticResource FontStyles}" 
+                          SelectedItem="{Binding Source={StaticResource FontStyle},Path=Value}"/>
+
+                    <ComboBox Width="{gui:CalcComboWidth}" ItemsSource="{StaticResource FontWeights}" 
+                          SelectedItem="{Binding Source={StaticResource FontWeight},Path=Value,
+                                                 Converter={StaticResource UpdateCollectionConverter},
+                                                 ConverterParameter={StaticResource FontWeights}}"/>
+
+                    <ComboBox Width="{gui:CalcComboWidth}" ItemsSource="{StaticResource FontSizes}"                           
+                          SelectedItem="{Binding Source={StaticResource FontSize},Path=Value, 
+                                                  Converter={StaticResource UpdateFontSizesConverter},
+                                                  ConverterParameter={StaticResource FontSizes}}"/>
+
+                    <CheckBox Content="UseDefaultFont" Margin="5,0,0,0" VerticalAlignment="Center">
+                        <CheckBox.IsChecked>
+                            <gui:FontResetExtension>
+                                <StaticResource ResourceKey="FontFamily"/>
+                                <StaticResource ResourceKey="FontStyle"/>
+                                <StaticResource ResourceKey="FontWeight"/>
+                                <StaticResource ResourceKey="FontSize"/>
+                            </gui:FontResetExtension>
+                        </CheckBox.IsChecked>
+                    </CheckBox>
+                </StackPanel>
+            </ContentControl>
+            <TextBlock Text="SampleString"/>
+        </StackPanel>
+    </DockPanel>
+</Window>
